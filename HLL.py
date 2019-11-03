@@ -1,3 +1,4 @@
+import Cardinality
 # HyperLogLog implementation for our project
 # Using cardinality estimation algorithms from:
     # Ertl, O. (2017). New cardinality estimation algorithms for HyperLogLog sketches. ArXiv.
@@ -16,5 +17,6 @@ class HLL:
         return
 
     def cardinality(self):
-        """Estimate cardinality of the HLL"""
+        C = Cardinality.getMultiplicity()
+        Cardinality.estimateCardinality(C)
         return
