@@ -41,8 +41,14 @@ class HLL:
             b_ten_read = b_ten_read + (int(c) * (4 ** (read_len - 1)))
             read_len = read_len - 1
 
-        read_hash = Hash.hash64shift()
+        read_hash = Hash.hash64shift(b_ten_read)
         read_hash = "{0:b}".format(read_hash)  # Converts into binary
+        len_read_hash = len(read_hash)
+
+        if len_read_hash < 64:
+            zeroes = "".join(["0"] * (64 - len_read_hash))
+            read_hash = zeroes + read_hash
+
         a = read_hash[0:self.p]  # First p bits of (p + q)-bit hash value of read
         b = read_hash[self.p:]  # Following q bits of (p + q)-bit hash value of read
 
@@ -50,7 +56,7 @@ class HLL:
         if k == -1:
             k = self.q
 
-        i = int(a) + 1
+        i = int(a, 2)
 
         if k > self.registers[i]:
             self.registers[i] = k
