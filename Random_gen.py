@@ -26,10 +26,9 @@ def generate_random_string(read_length):
 def generate_reads(jaccard_val, num_reads_a, num_reads_b, read_length):
     # Instantiate key variables
     total_reads = num_reads_a + num_reads_b
-    num_overlapped = math.ceil(total_reads * jaccard_val)
+    num_overlapped = math.ceil(jaccard_val * (total_reads) / (jaccard_val + 1))
     a = []
     b = []
-
     # If the num_overlapped amount is greater than either read
     # amount, then tell user and print the maximum jaccard value
     # in this case
@@ -51,15 +50,19 @@ def generate_reads(jaccard_val, num_reads_a, num_reads_b, read_length):
     for i in range(num_reads_b - num_overlapped):
         string = generate_random_string(read_length)
         b.append(string)
-    
+
+    # Calculate new jaccard value - if changed at all
+    ret_jaccard = num_overlapped / (num_reads_a + num_reads_b - num_overlapped)
+
+        
     random.shuffle(a)
     random.shuffle(b)
 
-    return a, b
+    return a, b, ret_jaccard
 
 def main(argv):
     jaccard_val, num_reads_a, num_reads_b, read_length = variable_assertions(argv)
-    a, b = generate_reads(jaccard_val, num_reads_a, num_reads_b, read_length)
+    a, b, ret_jaccard = generate_reads(jaccard_val, num_reads_a, num_reads_b, read_length)
     if a is None or b is None:
         return 
 
@@ -80,6 +83,8 @@ def main(argv):
         file_b.write(line)
         file_b.write("\n")
     file_b.close()
+
+    print("The Jaccard value is: " + str(ret_jaccard))
 
 
 if __name__ == "__main__":
