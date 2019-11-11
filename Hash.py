@@ -2,6 +2,8 @@ def rshift32(val, n): return (val % 0x100000000) >> n
 
 def rshift64(val, n): return (val % 0x10000000000000000) >> n
 
+# Source: Thomas Wang, March 2007
+# https://gist.github.com/badboy/6267743
 def hash64shift(key):
     key = (~key) + (key << 21)  # key = (key << 21) - key - 1
     key = key ^ (rshift64(key, 24))

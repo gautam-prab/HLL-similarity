@@ -1,5 +1,7 @@
 import Cardinality
 import Hash
+
+import Random_gen
 # HyperLogLog implementation for our project
 # Using cardinality estimation algorithms from:
     # Ertl, O. (2017). New cardinality estimation algorithms for HyperLogLog sketches. ArXiv.
@@ -10,7 +12,7 @@ class HLL:
     def __init__(self, p, registers=None):
         """Initialize HLL with 2^p registers"""
         self.p = p
-        self.q = 64 - p # assuming 32-bit hash value
+        self.q = 64 - p # assuming 64-bit hash value
         self.m = 2 ** p
 
         if registers != None:
@@ -42,7 +44,9 @@ class HLL:
             read_len = read_len - 1
 
         read_hash = Hash.hash64shift(b_ten_read)
+
         read_hash = "{0:b}".format(read_hash)  # Converts into binary
+
         len_read_hash = len(read_hash)
 
         if len_read_hash < 64:
@@ -52,9 +56,9 @@ class HLL:
         a = read_hash[0:self.p]  # First p bits of (p + q)-bit hash value of read
         b = read_hash[self.p:]  # Following q bits of (p + q)-bit hash value of read
 
-        k = b.find('1')
+        k = b.find('1')+1 # be sure to add 1 to match match from Ertl paper
         if k == -1:
-            k = self.q
+            k = self.q + 1
 
         i = int(a, 2)
 
@@ -63,9 +67,20 @@ class HLL:
         return
 
     def cardinality(self):
-        C = Cardinality.getMultiplicity(self)
-        Cardinality.estimateCardinality(C)
-        return
+        # C = Cardinality.getMultiplicity(self)
+        # Cardinality.estimateCardinality(C)
+        return Cardinality.simpleCardinality(self.getRegisters())
 
     def getRegisters(self):
         return self.registers
+
+# Test basic HLL functionality
+def main():
+    h = HLL(8)
+    for i in range(1000000):
+        h.insert(Random_gen.generate_random_string(40)) # probabilistically these are all distinct
+    print(h.cardinality())
+    print(h.getRegisters())
+
+if __name__ == "__main__":
+    main()
