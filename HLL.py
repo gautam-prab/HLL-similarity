@@ -67,7 +67,7 @@ class HLL:
         return
 
     def cardinality(self):
-        # C = Cardinality.getMultiplicity(self)
+        # C = Cardinality.getMultiplicity(self.getRegisters())
         # Cardinality.estimateCardinality(C)
         return Cardinality.simpleCardinality(self.getRegisters())
 
