@@ -24,22 +24,22 @@ def estimateCardinality(counts, registers):
     q = numCounts - 1
     m = len(registers)
 
-    if counts[numCounts] = m
+    if counts[numCounts] == m:
         return math.inf
 
     #min K that has a nonzero count
-    k_min = next(x for x, val in enumerate(counts) if val > 0)
+    k_min = next([x for x, val in enumerate(counts) if val > 0])
     k_prime_min = max(k_min, 1)
-    k_max = next(x for x, val in enumerate(reversed(counts) if val > 0)
+    k_max = next([x for x, val in enumerate(reversed(counts)) if val > 0])
     k_prime_max = min(k_max, q)
 
     z = 0
     for k in range(k_prime_min, k_prime_max):
-        z = 0.5(z) + counts[k]
+        z = 0.5*(z) + counts[k]
     z = z * 2^(-1 * k_prime_min)
     c = counts[numCounts]
     if q >= 1:
-        c = c + couns[k_prime_max]
+        c = c + counts[k_prime_max]
     g_prev = 0
     a = z + counts[0]
     b = z + counts[numCounts] * (2 ^ (-1 * q))
