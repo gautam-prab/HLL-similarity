@@ -18,10 +18,9 @@ def getMultiplicity(hll):
     return C
 
 
-def estimateCardinality(counts, registers):
+def estimateCardinality(counts, m):
     numCounts = len(counts) - 1
     q = numCounts - 1
-    m = len(registers)
 
     if counts[numCounts] == m:
         return math.inf
@@ -33,7 +32,7 @@ def estimateCardinality(counts, registers):
     k_max = numCounts - k_max
     k_prime_max = min(k_max, q)
     z = 0
-    for k in range(k_prime_min, k_prime_max):
+    for k in range(k_prime_min, k_prime_max + 1):
         z = 0.5 * (z) + counts[k]
     z = z * 2 ** (-1 * k_prime_min)
     c = counts[numCounts]
@@ -46,23 +45,28 @@ def estimateCardinality(counts, registers):
     if b <= (1.5 * a):
         x = m_prime / (0.5 * b + a)  # weak lower bound
     else:
-        x = m_prime / (b * np.log(1 + b/a))  # strong lower bound
+        x = (m_prime / (b)) * np.log(1 + b/a)  # strong lower bound
 
     delta_x = x
     delta = (10 ** -2) / np.sqrt(m)
+    g_prev = 0
     while delta_x > x * delta:
         ka = 2 + math.floor(np.log2(x))
-        x_prime = x * 2 ** (-max(k_max, ka)-1)
+        x_prime = x * (2 ** (-1*max(k_prime_max, ka)-1))
         x_dprime = x_prime * x_prime
         #taylor approximation
         h = x_prime - x_dprime / 3 + (x_dprime * x_dprime) * (1/45 - x_dprime/472.5)
-        for k in range(k_prime_max, ka - 1):
+        print(k_prime_max)
+        for k in range(k_prime_max, ka):
+            print(x_prime)
+            print(x / (2 ** (k + 2)))
             top = x_prime + h*(1-h)
             bottom = x_prime + (1-h)
             h = top/bottom
             x_prime = 2 * x_prime
         g = c * h
-        for k in range(k_prime_min, k_prime_max - 1):
+        for k in range(k_prime_min, k_prime_max):
+
             top = x_prime + h * (1-h)
             bottom = x_prime + (1-h)
             h = top/bottom
