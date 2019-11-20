@@ -4,7 +4,7 @@ import Hash
 import Random_gen
 # HyperLogLog implementation for our project
 # Using cardinality estimation algorithms from:
-    # Ertl, O. (2017). New cardinality estimation algorithms for HyperLogLog sketches. ArXiv.
+# Ertl, O. (2017). New cardinality estimation algorithms for HyperLogLog sketches. ArXiv.
 
 class HLL:
     """HyperLogLog implementation"""
@@ -67,9 +67,9 @@ class HLL:
         return
 
     def cardinality(self):
-        # C = Cardinality.getMultiplicity(self)
-        # Cardinality.estimateCardinality(C)
-        return Cardinality.simpleCardinality(self.getRegisters())
+        C = Cardinality.getMultiplicity(self)
+        return Cardinality.estimateCardinality(C, self.getRegisters()), Cardinality.simpleCardinality(self.getRegisters())
+        #return Cardinality.getMultiplicity(self)
 
     def getRegisters(self):
         return self.registers
@@ -77,7 +77,7 @@ class HLL:
 # Test basic HLL functionality
 def main():
     h = HLL(8)
-    for i in range(1000000):
+    for i in range(1000):
         h.insert(Random_gen.generate_random_string(40)) # probabilistically these are all distinct
     print(h.cardinality())
     print(h.getRegisters())
