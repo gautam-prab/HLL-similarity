@@ -68,9 +68,10 @@ class HLL:
 
     def cardinality(self):
         C = Cardinality.getMultiplicity(self)
-        print(C)
-        return Cardinality.estimateCardinality(C, self.m), Cardinality.simpleCardinality(self.getRegisters())
-        #return Cardinality.getMultiplicity(self)
+        return Cardinality.estimateCardinality(C, self.m)
+
+    def simple_cardinality(self):
+        return Cardinality.simpleCardinality(self.getRegisters())
 
     def getRegisters(self):
         return self.registers
@@ -78,10 +79,9 @@ class HLL:
 # Test basic HLL functionality
 def main():
     h = HLL(8)
-    for i in range(1000):
+    for i in range(10000):
         h.insert(Random_gen.generate_random_string(40)) # probabilistically these are all distinct
-    print(h.cardinality())
-    #print(h.getRegisters())
+    print('MLE: {}, Raw: {}'.format(h.cardinality(), h.simple_cardinality()))
 
 if __name__ == "__main__":
     main()

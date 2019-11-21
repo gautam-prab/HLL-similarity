@@ -2,8 +2,10 @@ import numpy as np
 import math
 
 
-'''Algorithm 4'''
+
 def getMultiplicity(hll):
+    """Get count vector from HLL registers."""
+    """Algorithm 4 from Ertl, O. (2017). New cardinality estimation algorithms for HyperLogLog sketches. ArXiv."""
     registers = hll.getRegisters()
     m = len(registers)
     one_position = hll.q
@@ -19,6 +21,8 @@ def getMultiplicity(hll):
 
 
 def estimateCardinality(counts, m):
+    """Maximum Likelihood Cardinality Estimation."""
+    """Algorithm 8 from Ertl, O. (2017). New cardinality estimation algorithms for HyperLogLog sketches. ArXiv."""
     numCounts = len(counts) - 1
     q = numCounts - 1
 
@@ -32,15 +36,15 @@ def estimateCardinality(counts, m):
     k_max = numCounts - k_max
     k_prime_max = min(k_max, q)
     z = 0
-    for k in range(k_prime_min, k_prime_max + 1):
+    for k in range(k_prime_max, k_prime_min-1, -1):
         z = 0.5 * (z) + counts[k]
     z = z * 2 ** (-1 * k_prime_min)
-    c = counts[numCounts]
+    c = counts[q+1]
     if q >= 1:
         c = c + counts[k_prime_max]
     g_prev = 0
     a = z + counts[0]
-    b = z + counts[numCounts] * (2 ** (-1 * q))
+    b = z + counts[q+1] * (2 ** (-1 * q))
     m_prime = m - counts[0]
     if b <= (1.5 * a):
         x = m_prime / (0.5 * b + a)  # weak lower bound
@@ -51,22 +55,19 @@ def estimateCardinality(counts, m):
     delta = (10 ** -2) / np.sqrt(m)
     g_prev = 0
     while delta_x > x * delta:
-        ka = 2 + math.floor(np.log2(x))
-        x_prime = x * (2 ** (-1*max(k_prime_max, ka)-1))
+        ka = math.floor(np.log2(x))
+        x_prime = x * (2 ** (-1*max(k_prime_max+1, ka+1)))
         x_dprime = x_prime * x_prime
         #taylor approximation
         h = x_prime - x_dprime / 3 + (x_dprime * x_dprime) * (1/45 - x_dprime/472.5)
-        print(k_prime_max)
-        for k in range(k_prime_max, ka):
-            print(x_prime)
+        for k in range(ka-1, k_prime_max-1, -1):
             print(x / (2 ** (k + 2)))
             top = x_prime + h*(1-h)
             bottom = x_prime + (1-h)
             h = top/bottom
             x_prime = 2 * x_prime
         g = c * h
-        for k in range(k_prime_min, k_prime_max):
-
+        for k in range(k_prime_max - 1, k_prime_min-1, -1):
             top = x_prime + h * (1-h)
             bottom = x_prime + (1-h)
             h = top/bottom
@@ -82,10 +83,9 @@ def estimateCardinality(counts, m):
     return m * x
 
 
-
-
-# Compute simple cardinality estimation, Algorithm 5 from Ertl
 def simpleCardinality(registers):
+    """Raw cardinality estimation."""
+    """Algorithm 5 from Ertl, O. (2017). New cardinality estimation algorithms for HyperLogLog sketches. ArXiv."""
     m = len(registers)
     alpha_m = 0.7213/(1+1.079/m)
 
