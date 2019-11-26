@@ -20,11 +20,13 @@ def getMultiplicity(hll):
     return C
 
 
-def estimateCardinality(counts, m):
+def estimateCardinality(counts):
     """Maximum Likelihood Cardinality Estimation."""
     """Algorithm 8 from Ertl, O. (2017). New cardinality estimation algorithms for HyperLogLog sketches. ArXiv."""
     numCounts = len(counts) - 1
     q = numCounts - 1
+
+    m = sum(counts)
 
     if counts[numCounts] == m:
         return math.inf

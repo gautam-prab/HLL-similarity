@@ -1,7 +1,7 @@
 import Cardinality
 import Hash
 
-import Random_gen
+from Random_Generators import Rangen_jaccard
 # HyperLogLog implementation for our project
 # Using cardinality estimation algorithms from:
 # Ertl, O. (2017). New cardinality estimation algorithms for HyperLogLog sketches. ArXiv.
@@ -68,7 +68,7 @@ class HLL:
 
     def cardinality(self):
         C = Cardinality.getMultiplicity(self)
-        return Cardinality.estimateCardinality(C, self.m)
+        return Cardinality.estimateCardinality(C)
 
     def simple_cardinality(self):
         return Cardinality.simpleCardinality(self.getRegisters())
@@ -80,7 +80,7 @@ class HLL:
 def main():
     h = HLL(8)
     for i in range(10000):
-        h.insert(Random_gen.generate_random_string(40)) # probabilistically these are all distinct
+        h.insert(Rangen_jaccard.generate_random_string(40)) # probabilistically these are all distinct
     print('MLE: {}, Raw: {}'.format(h.cardinality(), h.simple_cardinality()))
 
 if __name__ == "__main__":
