@@ -1,0 +1,13 @@
+Genome Lengths
+
+Genome			Length (MB)
+E coli			4.7e6
+L pneumonophila		3.36e6
+P aeruginosa		6.3e6
+S enterica LT2		4.8e6
+S enterica typhimurium	4.9e6
+S aureus		2.8e6
+S epidermidis		2.48e6
+S pyogenes		1.8e6
+S pneumoniae		2.09e6
+V cholerae		4.03e6
