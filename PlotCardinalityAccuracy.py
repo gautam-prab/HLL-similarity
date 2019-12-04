@@ -1,13 +1,13 @@
 from HLL import HLL
-import Random_gen
+from Random_Generators import Rangen_jaccard
 
 import numpy as np
 import matplotlib.pyplot as plt
 
 def main():
 
-    num_cards = 50
-    cardinalities = np.logspace(1,5,num_cards)
+    num_cards = 80
+    cardinalities = np.logspace(1, 6.7, num_cards)
     plot = np.zeros(num_cards)
     for i in range(num_cards):
         print('Starting '+str(i+1)+' out of '+str(num_cards))
@@ -18,7 +18,7 @@ def main():
         for j in range(trials):
             h = HLL(12)
             for k in range(card):
-                h.insert(Random_gen.generate_random_string(40))
+                h.insert(Rangen_jaccard.generate_random_string(40))
 
             obs_cardinality = h.cardinality()
 
