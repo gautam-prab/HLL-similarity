@@ -50,7 +50,6 @@ def generate_reads(forbes_val, num_reads_a, num_reads_b, read_length):
         string = generate_random_string(read_length)
         b.append(string)
 
-    # Calculate new jaccard value - if changed at all
     forbes = num_overlapped / (num_reads_a * num_reads_b)
 
     random.shuffle(a)

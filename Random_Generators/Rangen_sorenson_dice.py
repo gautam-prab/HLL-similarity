@@ -52,11 +52,10 @@ def generate_reads(sd, num_reads_a, num_reads_b, read_length):
         string = generate_random_string(read_length)
         b.append(string)
 
-    # Calculate new jaccard value - if changed at all
     sd_val = num_overlapped / (num_reads_a * num_reads_b)
 
-    # random.shuffle(a)
-    # random.shuffle(b)
+    random.shuffle(a)
+    random.shuffle(b)
 
     return a, b, sd_val
 
