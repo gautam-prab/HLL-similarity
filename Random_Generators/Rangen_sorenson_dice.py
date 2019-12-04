@@ -26,7 +26,6 @@ def generate_random_string(read_length):
 def generate_reads(sd, num_reads_a, num_reads_b, read_length):
     # Instantiate key variables
     num_overlapped = math.ceil(sd * (num_reads_a + num_reads_b) / 2)
-    print(num_overlapped)
     a = []
     b = []
 

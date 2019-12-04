@@ -54,16 +54,16 @@ def generate_reads(jaccard_val, num_reads_a, num_reads_b, read_length):
     # Calculate new jaccard value - if changed at all
     ret_jaccard = num_overlapped / (num_reads_a + num_reads_b - num_overlapped)
     forbes = num_overlapped / (num_reads_a * num_reads_b)
-
+    sd = 2 * num_overlapped / (num_reads_a + num_reads_b)
         
     random.shuffle(a)
     random.shuffle(b)
 
-    return a, b, ret_jaccard, forbes
+    return a, b, ret_jaccard, forbes, sd
 
 def main(argv):
     jaccard_val, num_reads_a, num_reads_b, read_length = variable_assertions(argv)
-    a, b, ret_jaccard, forbes = generate_reads(jaccard_val, num_reads_a, num_reads_b, read_length)
+    a, b, ret_jaccard, forbes, sd = generate_reads(jaccard_val, num_reads_a, num_reads_b, read_length)
     if a is None or b is None:
         return 
 
@@ -87,6 +87,7 @@ def main(argv):
 
     print("The Jaccard value is: " + str(ret_jaccard))
     print("The Forbes value is: " + str(forbes))
+    print("The Sorenson-Dice value is: " + str(sd))
 
 
 
