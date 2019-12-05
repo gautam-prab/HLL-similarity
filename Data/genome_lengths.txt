@@ -1,6 +1,6 @@
 Genome Lengths
 
-Genome			Length (MB)
+Genome			Length (bases)
 E coli			4.7e6
 L pneumonophila		3.36e6
 P aeruginosa		6.3e6

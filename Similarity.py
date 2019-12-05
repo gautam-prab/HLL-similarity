@@ -53,7 +53,12 @@ def main():
     print('Received Jaccard: '+str(i/u))
 
 def intersection(hll1, hll2):
-    """Calculate the cardinality of the intersection of two sets"""
+    _,_,int = getJointEstimators(hll1,hll2)
+    return int
+
+def getJointEstimators(hll1, hll2):
+    """Calculate the MLEs for the joint distribution of two HLLs
+    Returns: estimator for |A \ B|, estimator for |B \ A|, estimator for |A intersect B|"""
     # for now, assume hlls have same num. of registers
     assert isinstance(hll1, HLL)
     assert isinstance(hll2, HLL)
@@ -103,7 +108,7 @@ def intersection(hll1, hll2):
     phi_b = results.x[1] # |B \ A|
     phi_x = results.x[2] # |A n B|
 
-    return np.exp(phi_x)
+    return np.exp(phi_a), np.exp(phi_b), np.exp(phi_x)
 
 # Equation 72 from Ertl paper
 def calculate_log_likelihood(phi, C1_less, C2_less, C_equal, C1_greater, C2_greater, q, m):
@@ -173,7 +178,7 @@ def intersection_testing():
     card_a = 100000
     card_b = 100000
 
-    a,b,jac,_ = Rangen_jaccard.generate_reads(jac, card_a, card_b, 50)
+    a,b,jac,_,_ = Rangen_jaccard.generate_reads(jac, card_a, card_b, 50)
 
     for r in a:
         h1.insert(r)
@@ -192,5 +197,5 @@ def intersection_testing():
     print('Intersect MLE: '+str(i2))
 
 if __name__ == "__main__":
-    main()
-    # intersection_testing()
+    # main()
+    intersection_testing()
