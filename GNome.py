@@ -1,0 +1,39 @@
+import Cardinality
+import os
+import numpy as np
+from HLL import HLL
+import Similarity
+import glob
+
+
+def get_HLL(reads, numReads):
+    hll = HLL(12)
+    for i in range(numReads):
+        seq = inputLines[(i*2)+1].rstrip().upper()
+        hll.insert(seq)
+    return hll
+
+folder_path = 'Data/0.5x'
+sketches = []
+i = 0
+for filename in glob.glob(os.path.join(folder_path, '*.fasta')):
+    with open(filename) as myFile:
+        inputLines = myFile.readlines()
+    totalReads = int(len(inputLines) / 2)
+    sketches.append( get_HLL(inputLines, totalReads))
+    i += 1
+
+similarity_matrix = np.zeros((10,10))
+
+print(sketches)
+
+for i in range(10):
+    for j in range(i, 10):
+        h1 = sketches[i]
+        h2 = sketches[j]
+        union = Similarity.union(h1, h2).cardinality()
+        intersection = Similarity.intersection_inclusion_exclusion(h1, h2)
+        jaccard = intersection / union
+        similarity_matrix[i, j] = jaccard
+
+print(similarity_matrix)
