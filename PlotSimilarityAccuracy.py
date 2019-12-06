@@ -160,7 +160,7 @@ def sd():
                 h2.insert(s)
             # Calculation of intersection between two HLLs, necessary for SD calculation
             intersection = Similarity.intersection(h1,h2)
-            obs_sd = 2 * intersection / (h1.cardinality + h2.cardinality) # Calculation of expected Sorensen-Dice
+            obs_sd = 2 * intersection / (h1.cardinality() + h2.cardinality()) # Calculation of expected Sorensen-Dice
             error = 100 * (obs_sd - exp_sd) / exp_sd # Percent error calculation for SD
             results[j] = error
         plot[i] = np.mean(results)
