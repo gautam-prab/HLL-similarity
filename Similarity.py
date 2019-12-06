@@ -1,3 +1,10 @@
+"""
+Similarity.py: Union and Intersection estimation implementation for our project
+
+Using cardinality estimation algorithms from:
+Ertl, O. (2017). New cardinality estimation algorithms for HyperLogLog sketches. ArXiv.
+"""
+
 import Cardinality
 from HLL import HLL
 import numpy as np
@@ -6,59 +13,61 @@ import math
 from Random_Generators import Rangen_jaccard
 from scipy.optimize import fmin_bfgs
 from scipy.optimize import minimize
-# Union and Intersection estimation implementation for our project
-# Using cardinality estimation algorithms from:
-    # Ertl, O. (2017). New cardinality estimation algorithms for HyperLogLog sketches. ArXiv.
 
+"""
+Similarity.union():
+Calculate the HLL corresponding to the union of two sets, originates from Ertl, Algorithm 2
+
+Input: hll1, hll2; HyperLogLog objects corresponding to input sets
+Returns: HyperLogLog object corresponding to estimated cardinality of intersection
+"""
 def union(hll1, hll2):
-    """Calculate the HLL corresponding to the union of two sets"""
-    # for now, assume hlls have the same num. of registers; will fix later
+    # assume HLLs have the same number of registers
     assert isinstance(hll1, HLL)
     assert isinstance(hll2, HLL)
     r1 = hll1.getRegisters()
     r2 = hll2.getRegisters()
 
+    # create new registers that are the maximum of hll1 and hll2
     r_new = [0 for i in range(len(r1))]
     for i in range(len(r1)):
         r_new[i] = max(r1[i],r2[i])
 
+    # return a new HLL with the given registers
     new_hll = HLL(hll1.p, r_new)
     return new_hll
 
+"""
+Similarity.intersection_inclusion_exclusion():
+Calculate cardinality of the intersection through the inclusion-exclusion principle
+
+Input: hll1, hll2; HyperLogLog objects corresponding to input sets
+Returns: float corresponding to estimated cardinality of intersection of input sets"""
 def intersection_inclusion_exclusion(hll1, hll2):
-    """Calculate cardinality of the intersection through the inclusion-exclusion principle"""
     return hll1.cardinality() + hll2.cardinality() - union(hll1,hll2).cardinality()
 
-def main():
-    h1 = HLL(8)
-    h2 = HLL(8)
+"""
+Similarity.intersection():
+Calculate cardinality of intersection through Ertl's Joint MLE (Ertl Algorithm 9)
 
-    # generate 100,000 reads for each
-    # make them have a Jaccard similarity of 0.05 (1/20 reads are shared)
-    a,b,jac = Rangen_jaccard.generate_reads(0.05, 100000, 100000, 50)
-
-    for r in a:
-        h1.insert(r)
-    for r in b:
-        h2.insert(r)
-
-    print('H1 Cardinality: '+str(h1.cardinality()))
-    print('H2 Cardinality: '+str(h2.cardinality()))
-
-    print('Expected jaccard: '+str(jac))
-    u = union(h1,h2).cardinality()
-    i = intersection_inclusion_exclusion(h1,h2)
-    print('Union: '+str(u))
-    print('Intersect: '+str(i))
-    print('Received Jaccard: '+str(i/u))
-
+Input: hll1, hll2; HyperLogLog objects corresponding to input sets
+Returns: float corresponding to estimated cardinality of intersection
+"""
 def intersection(hll1, hll2):
     _,_,int = getJointEstimators(hll1,hll2)
     return int
 
+"""
+Similarity.getJointEstimators():
+Calculate the MLEs for the joint distribution of two HLLs (Ertl Algorithm 9)
+
+Input: hll1, hll2; HyperLogLog objects corresponding to input sets A and B
+Returns: float estimators (in order) for:
+    |A \ B|
+    |B \ A|
+    |A intersect B|
+"""
 def getJointEstimators(hll1, hll2):
-    """Calculate the MLEs for the joint distribution of two HLLs
-    Returns: estimator for |A \ B|, estimator for |B \ A|, estimator for |A intersect B|"""
     # for now, assume hlls have same num. of registers
     assert isinstance(hll1, HLL)
     assert isinstance(hll2, HLL)
@@ -68,6 +77,7 @@ def getJointEstimators(hll1, hll2):
     q = hll1.q
     m = hll1.m
 
+    # Calculate multiplicity vectors corresponding to comparisons between HLL1 and HLL2
     C1_less = np.zeros(q+2)
     C2_less = np.zeros(q+2)
     C1_greater = np.zeros(q+2)
@@ -84,38 +94,48 @@ def getJointEstimators(hll1, hll2):
         else:
             C_equal[r1[i]] += 1
 
+    # Get initial cardinality estimates as initial values for optimizer
     lambda_ax = Cardinality.estimateCardinality(C1_less + C_equal + C1_greater)
     lambda_bx = Cardinality.estimateCardinality(C2_greater + C_equal + C2_less)
 
     if C1_less[0] + C_equal[0] + C2_less[0] == m:
-        # at least one HLL is 0 at every position
-        return 0
+        # at least one HLL is 0 at every position; there is no intersect
+        return (lambda_ax, lambda_bx, 0)
 
     lambda_abx = Cardinality.estimateCardinality(C1_greater + C_equal + C2_greater)
 
+    # transfer variables to the log domain
     phi_a = np.log(max(1, lambda_abx-lambda_bx))
     phi_b = np.log(max(1, lambda_abx-lambda_ax))
     phi_x = np.log(max(1, lambda_ax+lambda_bx-lambda_abx))
 
-    optimize_condition = True
-    delta = 0.01/np.sqrt(m)
+    delta = 0.01/np.sqrt(m) # tolerance for change in gradient
 
     args = (C1_less, C2_less, C_equal, C1_greater, C2_greater, q, m)
-    # results = fmin_bfgs(calculate_log_likelihood, np.array([phi_a+50, phi_b+50, phi_x+50]), calculate_ll_gradient, args=args, gtol=delta, disp=True, epsilon = 1.5e-2)
+
+    # maximize log-likelihood using L-BFGS-B
     results = minimize(calculate_log_likelihood, np.array([phi_a+1, phi_b+1, phi_x+1]), method='L-BFGS-B', args=args, options={'gtol':delta, 'disp':False})
 
     phi_a = results.x[0] # |A \ B|
     phi_b = results.x[1] # |B \ A|
     phi_x = results.x[2] # |A n B|
 
+    # re-exponentiate and return estimators
     return np.exp(phi_a), np.exp(phi_b), np.exp(phi_x)
 
-# Equation 72 from Ertl paper
+"""
+calculate_log_likelihood():
+Log-Likelihood for Joint Estimator. We want to find phi_A, phi_B, and phi_X that maximize (minimize the negative) this equation
+Equation 72 from Ertl paper
+
+This is a helper method for the getJointEstimators() function.
+"""
 def calculate_log_likelihood(phi, C1_less, C2_less, C_equal, C1_greater, C2_greater, q, m):
     phi_a = phi[0]
     phi_b = phi[1]
     phi_x = phi[2]
 
+    # follow sum equation from Ertl paper
     f = 0
     (xa,ya,za) = calculate_xyz(phi_a, q, m)
     (xb,yb,zb) = calculate_xyz(phi_b, q, m)
@@ -130,8 +150,14 @@ def calculate_log_likelihood(phi, C1_less, C2_less, C_equal, C1_greater, C2_grea
         f -= (C1_less[k] + C_equal[k] + C1_greater[k])*xa[k] + (C2_less[k] + C_equal[k] + C2_greater[k])*xb[k] + (C1_less[k] + C_equal[k] + C2_less[k])*xx[k]
     return -f
 
-# Not using LL gradient – there is an error in it and it's more accurate to just calculate gradient by finite differences
+"""
+calculate_ll_gradient():
+Gradient of Log-Likelihood for use in optimization.
+Equation 75 from Ertl paper
 
+This is a helper method for the getJointEstimators() function.
+There is an error in this function so it is commented out, using a gradient-free optimizer instead.
+"""
 # def calculate_ll_gradient(phi, C1_less, C2_less, C_equal, C1_greater, C2_greater, q, m):
 #     phi_a = phi[0]
 #     phi_b = phi[1]
@@ -156,6 +182,13 @@ def calculate_log_likelihood(phi, C1_less, C2_less, C_equal, C1_greater, C2_grea
 #         dx -= (C1_less[k] + C_equal[k] + C2_less[k])*xx[k]
 #     return np.array([da, db, dx])
 
+"""
+calculate_xyz():
+Calculates expressions for log-likelihood.
+Equation 73 from Ertl paper
+
+This is a helper method for the calculate_log_likelihood() function.
+"""
 def calculate_xyz(phi, q, m):
     x = np.zeros(q+1)
     z = np.zeros(q+1)
@@ -170,32 +203,51 @@ def calculate_xyz(phi, q, m):
             z[k] = 1 - y[k]
     return (x,y,z)
 
-def intersection_testing():
-    h1 = HLL(8)
-    h2 = HLL(8)
+"""
+main()
 
-    jac = 0.1
+Runs a test of union, intersection, and intersection_inclusion_exclusion
+"""
+def main():
+    h1 = HLL(12)
+    h2 = HLL(12)
+
+    jac = 0.05
     card_a = 100000
     card_b = 100000
 
+    # Generate random data
     a,b,jac,_,_ = Rangen_jaccard.generate_reads(jac, card_a, card_b, 50)
 
+    # add to HLLs
     for r in a:
         h1.insert(r)
     for r in b:
         h2.insert(r)
 
-    print('H1 Cardinality: '+str(h1.cardinality()))
-    print('H2 Cardinality: '+str(h2.cardinality()))
-
+    # test estimators
+    print('Actual Cardinalities: '+str(100000))
+    print('H1 Cardinality Estimation: '+str(h1.cardinality()))
+    print('H2 Cardinality Estimation: '+str(h2.cardinality()))
+    print()
     expected_i = math.ceil(jac * (card_a + card_b) / (jac + 1))
 
-    print('Expected intersection: '+str(expected_i))
+    print('Actual Union: '+str(100000*2-expected_i))
+    print('Union Estimate: '+str(union(h1,h2).cardinality()))
+    print()
+
+    print('Actual Intersection: '+str(expected_i))
     i1 = intersection_inclusion_exclusion(h1,h2)
-    print('Intersect IE: '+str(i1))
-    i2 = intersection(h1,h2)
-    print('Intersect MLE: '+str(i2))
+    print('Intersect IE Estimate: '+str(i1))
+    a_excl, b_excl, i2 = getJointEstimators(h1,h2)
+    print('Intersect MLE Estimate: '+str(i2))
+
+    print()
+
+    print('Actual H1 (without Intersection): '+str(100000-expected_i))
+    print('H1 (Expected) Cardinality Estimation: '+str(a_excl))
+    print('Actual H2 (without Intersection): '+str(100000-expected_i))
+    print('H2 (Expected) Cardinality Estimation: '+str(b_excl))
 
 if __name__ == "__main__":
-    # main()
-    intersection_testing()
+    main()
