@@ -2,6 +2,8 @@ import sys
 import math
 import random
 
+# Function that takes in command line arguments and
+# parses it while assertin that they are correct
 def variable_assertions(argv):
     assert(len(argv) == 4)
     sd = float(argv[0])
@@ -14,6 +16,7 @@ def variable_assertions(argv):
     assert(read_length > 0)
     return sd, num_reads_a, num_reads_b, read_length
 
+# Function that generates random strings given a read length
 def generate_random_string(read_length):
     ACGT = "ACGT"
     string = ""
@@ -23,6 +26,7 @@ def generate_random_string(read_length):
         
     return string
 
+# Function that generates set A and B given command line arguments
 def generate_reads(sd, num_reads_a, num_reads_b, read_length):
     # Instantiate key variables
     num_overlapped = math.ceil(sd * (num_reads_a + num_reads_b) / 2)
@@ -30,7 +34,7 @@ def generate_reads(sd, num_reads_a, num_reads_b, read_length):
     b = []
 
     # If the num_overlapped amount is greater than either read
-    # amount, then tell user and print the maximum forbes value
+    # amount, then tell user and print the maximum sorenson-dice value
     # in this case
     if num_overlapped > num_reads_a or num_overlapped > num_reads_b:
         print("Given the number of reads for both, the Sorenson Dice value must be less than:")

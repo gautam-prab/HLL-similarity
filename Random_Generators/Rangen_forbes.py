@@ -2,6 +2,8 @@ import sys
 import math
 import random
 
+# Function that takes in command line arguments and
+# parses it while assertin that they are correct
 def variable_assertions(argv):
     assert(len(argv) == 4)
     forbes_val = float(argv[0])
@@ -14,6 +16,7 @@ def variable_assertions(argv):
     assert(read_length > 0)
     return forbes_val, num_reads_a, num_reads_b, read_length
 
+# Function that generates random strings given a read length
 def generate_random_string(read_length):
     ACGT = "ACGT"
     string = ""
@@ -23,6 +26,7 @@ def generate_random_string(read_length):
         
     return string
 
+# Function that generates set A and B given command line arguments
 def generate_reads(forbes_val, num_reads_a, num_reads_b, read_length):
     # Instantiate key variables
     a = (-1 / 2 * forbes_val - 1)
