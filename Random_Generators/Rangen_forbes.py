@@ -25,7 +25,10 @@ def generate_random_string(read_length):
 
 def generate_reads(forbes_val, num_reads_a, num_reads_b, read_length):
     # Instantiate key variables
-    num_overlapped = math.ceil(forbes_val * num_reads_a * num_reads_b)
+    a = (-1 / 2 * forbes_val - 1)
+    b = (num_reads_a + num_reads_b) * (1 / 2 * forbes_val + 1)
+    c = -3 / 2 * forbes_val * num_reads_a * num_reads_b
+    num_overlapped = math.ceil((-b + math.sqrt(b * b - 4 * a * c)) / (2 * a))
     a = []
     b = []
     # If the num_overlapped amount is greater than either read
@@ -50,7 +53,11 @@ def generate_reads(forbes_val, num_reads_a, num_reads_b, read_length):
         string = generate_random_string(read_length)
         b.append(string)
 
-    forbes = num_overlapped / (num_reads_a * num_reads_b)
+    union = num_reads_a + num_reads_b - num_overlapped
+    b_size = num_reads_a - num_overlapped
+    c_size = num_reads_b - num_overlapped
+    forbes = (num_overlapped * union) / ((num_overlapped * union) + 3 / 2 * (b_size * c_size))
+    #forbes = num_overlapped / (num_reads_a * num_reads_b)
 
     random.shuffle(a)
     random.shuffle(b)
