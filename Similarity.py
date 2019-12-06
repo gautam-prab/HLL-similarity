@@ -18,8 +18,8 @@ from scipy.optimize import minimize
 Similarity.union():
 Calculate the HLL corresponding to the union of two sets, originates from Ertl, Algorithm 2
 
-Input: hll1, hll2; HyperLogLog objects corresponding to input sets
-Returns: HyperLogLog object corresponding to estimated cardinality of intersection
+Input: hll1, hll2; HLL objects corresponding to input sets
+Returns: HLL object corresponding to estimated cardinality of intersection
 """
 def union(hll1, hll2):
     # assume HLLs have the same number of registers
@@ -41,7 +41,7 @@ def union(hll1, hll2):
 Similarity.intersection_inclusion_exclusion():
 Calculate cardinality of the intersection through the inclusion-exclusion principle
 
-Input: hll1, hll2; HyperLogLog objects corresponding to input sets
+Input: hll1, hll2; HLL objects corresponding to input sets
 Returns: float corresponding to estimated cardinality of intersection of input sets"""
 def intersection_inclusion_exclusion(hll1, hll2):
     return hll1.cardinality() + hll2.cardinality() - union(hll1,hll2).cardinality()
@@ -50,7 +50,7 @@ def intersection_inclusion_exclusion(hll1, hll2):
 Similarity.intersection():
 Calculate cardinality of intersection through Ertl's Joint MLE (Ertl Algorithm 9)
 
-Input: hll1, hll2; HyperLogLog objects corresponding to input sets
+Input: hll1, hll2; HLL objects corresponding to input sets
 Returns: float corresponding to estimated cardinality of intersection
 """
 def intersection(hll1, hll2):
@@ -61,7 +61,7 @@ def intersection(hll1, hll2):
 Similarity.getJointEstimators():
 Calculate the MLEs for the joint distribution of two HLLs (Ertl Algorithm 9)
 
-Input: hll1, hll2; HyperLogLog objects corresponding to input sets A and B
+Input: hll1, hll2; HLL objects corresponding to input sets A and B
 Returns: float estimators (in order) for:
     |A \ B|
     |B \ A|
