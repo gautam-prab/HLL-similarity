@@ -181,6 +181,7 @@ def sd(num_cards, base_start, base_stop, num_trials, exp_sd, read_lengths):
     plt.title('Sorensen-Dice (set at 0.04) Accuracy for reads of length 40')
     plt.xlabel('Cardinality')
     plt.ylabel('% Error (mean of 10)')
+    plt.ylim(-100, 100)
     plt.scatter(cardinalities, plot)
     plt.show()
 
