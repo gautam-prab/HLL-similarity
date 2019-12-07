@@ -1,12 +1,20 @@
+"""
+GenomeRanking.py: Ranking genomes and calculating correlations from ranking matrices
+
+This file supplies helper methods for GNome.py
+"""
 import numpy as np
 from scipy.stats import rankdata
 from scipy.stats import kendalltau
 
-"""Rank genomes based on similarity
+"""
+rank_genomes():
+Rank genomes based on similarity
 Input is a square upper triangular matrix of similarity values of a similar form:
     genome 1    1   s(1,2)  s(1,3)
     genome 2    0   1       s(2,3)
     genome 3    0   0       1
+(such as one from GNome.calculate_rankings())
 
 Output is a matrix of each genome's rankings:
     genome 1    rank(1) rank(2) rank(3)
@@ -28,9 +36,13 @@ def rank_genomes(sim_matrix):
         rankings[idx,:] = len(row) - rankdata(row, method='min')
     return rankings
 
-"""Compare two ranking matrices using average Kendall's tau distance
-Outupt values will be between -1 and 1; 1 indicates perfect agreement
-Input: two ranking matrices from the rank_genomes() function"""
+"""
+compare_rankings():
+
+Compare two ranking matrices using average Kendall's tau distance
+
+Input: two ranking matrices from the rank_genomes() function
+Output: a float between -1 and 1; 1 indicates perfect agreement, -1 indicates perfect disagreement"""
 def compare_rankings(mat1, mat2):
     n = mat1.shape[0]
     kt_sum = 0

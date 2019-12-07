@@ -1,6 +1,6 @@
 from HLL import HLL
 import Similarity
-from Random_Generators import Rangen_jaccard, Rangen_forbes, Rangen_sorenson_dice
+from Random_Generators import Rangen_jaccard, Rangen_forbes, Rangen_sorensen_dice
 
 import sys
 
@@ -12,7 +12,7 @@ import math
     python PlotSimilarityAccuracy.py jac to modulate jaccard
     python PlotSimilarityAccuracy.py intersection to modulate intersection
     python PlotSimilarityAccuracy.py forbes to modulate forbes
-    python PlotSimilarityAccuracy.py sd to modulate sorenson-dice
+    python PlotSimilarityAccuracy.py sd to modulate sorensen-dice
     Accompanied with appropriate command line argument parameters, described at bottom
 """
 
@@ -165,7 +165,7 @@ def sd(num_cards, base_start, base_stop, num_trials, exp_sd, read_lengths):
             h1 = HLL(12)
             h2 = HLL(12)
             # Generate reads of length 40 based on the expected Sorensen-Dice, 0.04
-            a,b,exp_sd = Rangen_sorenson_dice.generate_reads(exp_sd, card, card, read_lengths)
+            a,b,exp_sd = Rangen_sorensen_dice.generate_reads(exp_sd, card, card, read_lengths)
             for s in a:
                 h1.insert(s)
             for s in b:
@@ -178,7 +178,7 @@ def sd(num_cards, base_start, base_stop, num_trials, exp_sd, read_lengths):
         plot[i] = np.mean(results)
     print(plot)  # Print out all percent errors
     plt.xscale('log')
-    plt.title('Sorenson-Dice (set at 0.04) Accuracy for reads of length 40')
+    plt.title('Sorensen-Dice (set at 0.04) Accuracy for reads of length 40')
     plt.xlabel('Cardinality')
     plt.ylabel('% Error (mean of 10)')
     plt.scatter(cardinalities, plot)

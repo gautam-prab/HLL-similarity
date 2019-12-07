@@ -3,6 +3,9 @@ GNome.py: Similarity estimation for simulated bacterial genome reads
 
 Usage: accepts one argument which is the path to read Data
        python GNome.py Data/0.5x
+
+       alternatively, one argument which is a path to a sketch file
+       python GNome.py 5x.sketch
 """
 
 import Cardinality
@@ -116,7 +119,7 @@ def get_ground_truth():
 """
 For each genome in given file, generates k-mers from reads and sketches HLL.
 Then, calculates similarity ranking matrices for Jaccard, Forbes, and
-Sorenson-Dice and compares to ground truth matrix.
+Sorensen-Dice and compares to ground truth matrix.
 
 Output: Similarity accuracies (percent matches between similarity matrix and
 ground truth)
