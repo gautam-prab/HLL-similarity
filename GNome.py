@@ -1,12 +1,27 @@
+"""
+GNome.py: Similarity estimation for simulated bacterial genome reads
+
+Usage: accepts one argument which is the path to read Data
+       python GNome.py Data/0.5x
+"""
+
 import Cardinality
 import os
+import sys
 import numpy as np
 from HLL import HLL
 import Similarity
 import glob
 import GenomeRankings
+import pickle
 
+"""
+get_HLL():
+Generates and returns HLL by inserting 25-mers from reads
 
+Input: reads from FASTA and number of reads in file
+Returns: filled HLL from set of reads
+"""
 def get_HLL(reads, numReads):
     hll = HLL(12)
     for i in range(numReads):
@@ -16,75 +31,111 @@ def get_HLL(reads, numReads):
             hll.insert(seq[i:i+25])
     return hll
 
-folder_path = 'Data/50x'
-sketches = []
-species = []
-i = 0
+def get_sketches(folder_path):
+    sketches = []
+    species = []
+    i = 0
 
-print('Reading Files...')
-files = glob.glob(os.path.join(folder_path, '*.fasta'))
-files.sort()
-for filename in files:
-    with open(filename) as myFile:
-        inputLines = myFile.readlines()
-    species.append(filename)
-    print('\tReading file: {}'.format(filename))
-    totalReads = int(len(inputLines) / 2)
-    sketches.append( get_HLL(inputLines, totalReads))
-    i += 1
+    files = glob.glob(os.path.join(folder_path, '*.fasta'))
+    files.sort()
+    for filename in files:
+        with open(filename) as myFile:
+            inputLines = myFile.readlines()
+        species.append(filename)
+        print('\tReading file: {}'.format(filename))
+        totalReads = int(len(inputLines) / 2)
+        sketches.append(get_HLL(inputLines, totalReads))
+        i += 1
 
-jaccard_matrix = np.zeros((10,10))
-sd_matrix = np.zeros((10,10))
-forbes_matrix = np.zeros((10,10))
+    return sketches, species
 
-print('Calculating pairwise similarities...')
-for i in range(10):
-    for j in range(i, 10):
-        h1 = sketches[i]
-        h2 = sketches[j]
-        union = Similarity.union(h1, h2).cardinality()
-        a_excl, b_excl, intersection = Similarity.getJointEstimators(h1, h2)
-        a = h1.cardinality()
-        b = h2.cardinality()
+"""
+calculate_rankings():
+Creates similarity matrices for three separate similarity coefficients
+and calls rank_genomes to create vectors based on similarities
 
-        jaccard = intersection / union
-        sd = 2*intersection/(a + b)
-        forbes = (intersection*union)/(intersection*union + 1.5*a_excl*b_excl)
+Input: array of sketches
+Returns: matrix of each genomes similarity rankings
+"""
+def calculate_rankings(sketches):
+    n_genomes = len(sketches)
 
-        jaccard_matrix[i, j] = jaccard
-        sd_matrix[i, j] = sd
-        forbes_matrix[i, j] = forbes
+    jaccard_matrix = np.zeros((n_genomes,n_genomes))
+    sd_matrix = np.zeros((n_genomes,n_genomes))
+    forbes_matrix = np.zeros((n_genomes,n_genomes))
 
-# np.set_printoptions(precision = 2, linewidth = 200)
-# print('Similarity Matrix:')
-# print(similarity_matrix)
+    print('Calculating pairwise similarities...')
+    for i in range(n_genomes):
+        for j in range(i, n_genomes):
+            h1 = sketches[i]
+            h2 = sketches[j]
+            union = Similarity.union(h1, h2).cardinality()
+            a_excl, b_excl, intersection = Similarity.getJointEstimators(h1, h2)
+            a = h1.cardinality()
+            b = h2.cardinality()
 
-jaccard_rankings = GenomeRankings.rank_genomes(jaccard_matrix)
-sd_rankings = GenomeRankings.rank_genomes(sd_matrix)
-forbes_rankings = GenomeRankings.rank_genomes(forbes_matrix)
+            jaccard = intersection / union
+            sd = 2*intersection/(a + b)
+            forbes = (intersection*union)/(intersection*union + 1.5*a_excl*b_excl)
 
-# print('Rankings:')
-# for i in range(rankings.shape[0]):
-#     print('{}\t\t{}'.format(species[i],str(rankings[i,:])))
+            jaccard_matrix[i, j] = jaccard
+            sd_matrix[i, j] = sd
+            forbes_matrix[i, j] = forbes
 
-ground_truth = np.array([[0., 9., 4., 2., 1., 9., 9., 9., 9., 3.],
+    jaccard_rankings = GenomeRankings.rank_genomes(jaccard_matrix)
+    sd_rankings = GenomeRankings.rank_genomes(sd_matrix)
+    forbes_rankings = GenomeRankings.rank_genomes(forbes_matrix)
+    return jaccard_rankings, forbes_rankings, sd_rankings
+
+"""
+get_ground_truth():
+
+Returns matrix of ground_truth similarities generated from enviomics ANI
+"""
+def get_ground_truth():
+    return np.array([[0., 9., 4., 9., 2., 1., 9., 9., 9., 3.],
        [9., 0., 9., 9., 9., 9., 9., 9., 9., 9.],
-       [3., 9., 0., 2., 1., 9., 9., 9., 9., 9.],
-       [2., 9., 3., 0., 1., 9., 9., 9., 9., 4.],
-       [2., 9., 3., 1., 0., 9., 9., 9., 9., 4.],
-       [9., 9., 9., 9., 9., 0., 1., 9., 9., 9.],
-       [9., 9., 9., 9., 9., 1., 0., 9., 9., 9.],
+       [3., 9., 0., 9., 2., 1., 9., 9., 9., 9.],
+       [9., 9., 9., 0., 9., 9., 1., 9., 9., 9.],
+       [2., 9., 3., 9., 0., 1., 9., 9., 9., 4.],
+       [2., 9., 3., 9., 1., 0., 9., 9., 9., 4.],
+       [9., 9., 9., 1., 9., 9., 0., 9., 9., 9.],
        [9., 9., 9., 9., 9., 9., 9., 0., 1., 9.],
        [9., 9., 9., 9., 9., 9., 9., 1., 0., 9.],
-       [2., 9., 9., 3., 1., 9., 9., 9., 9., 0.]]) # from ANI data
+       [2., 9., 9., 9., 3., 1., 9., 9., 9., 0.]]) # from ANI data
 
-jaccard_acc = GenomeRankings.compare_rankings(jaccard_rankings, ground_truth)
-sd_acc = GenomeRankings.compare_rankings(sd_rankings, ground_truth)
-forbes_acc = GenomeRankings.compare_rankings(forbes_rankings, ground_truth)
-print('Jaccard Similarity Accuracy: {}'.format(jaccard_acc))
-print('Sorenson-Dice Similarity Accuracy: {}'.format(sd_acc))
-print('Forbes Similarity Accuracy: {}'.format(forbes_acc))
+"""
+For each genome in given file, generates k-mers from reads and sketches HLL.
+Then, calculates similarity ranking matrices for Jaccard, Forbes, and
+Sorenson-Dice and compares to ground truth matrix.
 
-import pickle
-with open('50x.sketch', 'wb') as sketchfile:
-  pickle.dump(sketches, sketchfile)
+Output: Similarity accuracies (percent matches between similarity matrix and
+ground truth)
+"""
+def main():
+    if sys.argv[1].rstrip()[-7:] == '.sketch':
+        sketches = pickle.load(open(sys.argv[1], 'rb'))
+
+    else:
+        folder_path = sys.argv[1]  # path: 'Data/0.5x' or 5x/50x for other coverages
+        print('Reading Files...')
+        sketches, species = get_sketches(folder_path)
+
+
+    jaccard_rankings, forbes_rankings, sd_rankings = calculate_rankings(sketches)
+    ground_truth = get_ground_truth()
+
+    jaccard_acc = GenomeRankings.compare_rankings(jaccard_rankings, ground_truth)
+    sd_acc = GenomeRankings.compare_rankings(sd_rankings, ground_truth)
+    forbes_acc = GenomeRankings.compare_rankings(forbes_rankings, ground_truth)
+    print('Jaccard Similarity Accuracy: {}'.format(jaccard_acc))
+    print('Sorenson-Dice Similarity Accuracy: {}'.format(sd_acc))
+    print('Forbes Similarity Accuracy: {}'.format(forbes_acc))
+
+    outfile = input('Output Sketch Filename (enter for none): ')
+    if outfile.rstrip() != '':
+        with open(outfile+'.sketch', 'wb') as sketchfile:
+          pickle.dump(sketches, sketchfile)
+
+if (__name__ == '__main__'):
+    main()
