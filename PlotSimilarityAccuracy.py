@@ -213,6 +213,6 @@ if (__name__ == '__main__'):
     card_sp = float(sys.argv[4])
     num_t = int(sys.argv[5])
     exp_const = float(sys.argv[6])
-    read_lengths = int(sys.argv[7])
+    read_lengths = 40
     print(arg, num_c, card_s, num_t, exp_const, read_lengths)
     main(arg, num_c, card_s, card_sp, num_t, exp_const, read_lengths)

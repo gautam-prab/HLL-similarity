@@ -10,7 +10,10 @@ from HLL import HLL
 import numpy as np
 import math
 
+import sys
+
 from Random_Generators import Rangen_jaccard
+
 from scipy.optimize import fmin_bfgs
 from scipy.optimize import minimize
 
@@ -208,13 +211,13 @@ main()
 
 Runs a test of union, intersection, and intersection_inclusion_exclusion
 """
-def main():
+def main(args):
     h1 = HLL(12)
     h2 = HLL(12)
 
-    jac = 0.05
-    card_a = 100000
-    card_b = 100000
+    jac = float(args[2])
+    card_a = int(args[0])
+    card_b = int(args[1])
 
     # Generate random data
     a,b,jac,_,_ = Rangen_jaccard.generate_reads(jac, card_a, card_b, 50)
@@ -226,28 +229,28 @@ def main():
         h2.insert(r)
 
     # test estimators
-    print('Actual Cardinalities: '+str(100000))
-    print('H1 Cardinality Estimation: '+str(h1.cardinality()))
-    print('H2 Cardinality Estimation: '+str(h2.cardinality()))
+    print('Actual Cardinalities: '+str(card_a)+','+str(card_b))
+    print('A Cardinality Estimation: '+str(h1.cardinality()))
+    print('B Cardinality Estimation: '+str(h2.cardinality()))
     print()
     expected_i = math.ceil(jac * (card_a + card_b) / (jac + 1))
 
-    print('Actual Union: '+str(100000*2-expected_i))
+    print('Actual Union: '+str(card_a+card_b-expected_i))
     print('Union Estimate: '+str(union(h1,h2).cardinality()))
     print()
 
     print('Actual Intersection: '+str(expected_i))
     i1 = intersection_inclusion_exclusion(h1,h2)
-    print('Intersect IE Estimate: '+str(i1))
+    print('Intersect Inclusion-Exclusion Estimate: '+str(i1))
     a_excl, b_excl, i2 = getJointEstimators(h1,h2)
     print('Intersect MLE Estimate: '+str(i2))
 
     print()
 
-    print('Actual H1 (without Intersection): '+str(100000-expected_i))
-    print('H1 (Expected) Cardinality Estimation: '+str(a_excl))
-    print('Actual H2 (without Intersection): '+str(100000-expected_i))
-    print('H2 (Expected) Cardinality Estimation: '+str(b_excl))
+    print('Actual A-B: '+str(card_a-expected_i))
+    print('A-B (Expected) Cardinality Estimation: '+str(a_excl))
+    print('Actual B-A (without Intersection): '+str(card_b-expected_i))
+    print('B-A (Expected) Cardinality Estimation: '+str(b_excl))
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])

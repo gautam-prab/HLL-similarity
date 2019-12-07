@@ -1,5 +1,6 @@
 import Cardinality
 import Hash
+import sys
 
 from Random_Generators import Rangen_jaccard
 # HyperLogLog implementation for our project
@@ -25,7 +26,7 @@ class HLL:
     HLL.insert():
     Inserts reads into the HLL, utilizes a uniform hashing function and methods
     Comes from Algorithm 1 in Ertl paper
-    
+
     Input: The HLL, the read
     """
     def insert(self, read):
@@ -81,7 +82,7 @@ class HLL:
     HLL.cardinality():
     Calls the getMultiplicity() function to get the count vector from HLL registers
     Calls the estimateCardinality() function to calculate the maximum likelihood estimator for the cardinality of a HLL
-    
+
     Input: The HLL
     Output: The cardinality estimate
     """
@@ -92,7 +93,7 @@ class HLL:
     """
     HLL.simple_cardinality():
     Calls the simpleCardinality() function to calculate cardinality of HLL by bias-corrected harmonic mean
-    
+
     Input: The HLL
     Output: The cardinality estimate
     """
@@ -102,7 +103,7 @@ class HLL:
     """
     HLL.getRegisters():
     Returns the registers of the HLL, a list of values
-    
+
     Input: The HLL
     Output: The registers
     """
@@ -110,11 +111,13 @@ class HLL:
         return self.registers
 
 # Test basic HLL functionality
-def main():
-    h = HLL(8)
-    for i in range(10000):
-        h.insert(Rangen_jaccard.generate_random_string(40)) # probabilistically these are all distinct
-    print('MLE: {}, Raw: {}'.format(h.cardinality(), h.simple_cardinality()))
+def main(args):
+    h = HLL(12)
+    n = int(args[0])
+
+    for i in range(n):
+        h.insert(Rangen_jaccard.generate_random_string(50)) # probabilistically these are all distinct
+    print('Actual: {}\nRaw: {}\n MLE: {}'.format(n, h.simple_cardinality(), h.cardinality()))
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])

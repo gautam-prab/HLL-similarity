@@ -34,11 +34,13 @@ def main(num_cards, base_start, base_stop, num_trials, read_length):
 
         plot[i] = 100 * (np.mean(results) - card) / card  # Plots percent error of calculated cardinality vs. expected value
 
+    print('Mean Errors:')
     print(plot)
     plt.xscale('log')
     plt.title('Cardinality Accuracy for reads of length 40')
     plt.xlabel('Cardinality')
     plt.ylabel('% Error (mean of 10)')
+    plt.ylim(-100,100)
     plt.scatter(cardinalities, plot)
     plt.show()
 
@@ -48,6 +50,6 @@ if (__name__ == '__main__'):
     card_s = float(sys.argv[2])
     card_sp = float(sys.argv[3])
     num_t = int(sys.argv[4])
-    read_length = int(sys.argv[5])
+    read_length = 40
     print(num_c, card_s, card_sp, num_t, read_length)
     main(num_c, card_s, card_sp, num_t, read_length)

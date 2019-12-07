@@ -31,6 +31,15 @@ def get_HLL(reads, numReads):
             hll.insert(seq[i:i+25])
     return hll
 
+"""
+get_sketches():
+Generates a set of sketches given a folder_path
+
+Input: folder_path, a string containing a path to a folder of FASTA files containing Illumina reads
+Output:
+    sketches, a list of HLLs for each FASTA file
+    species, a list of filenames the same length as sketches
+"""
 def get_sketches(folder_path):
     sketches = []
     species = []
@@ -129,7 +138,7 @@ def main():
     sd_acc = GenomeRankings.compare_rankings(sd_rankings, ground_truth)
     forbes_acc = GenomeRankings.compare_rankings(forbes_rankings, ground_truth)
     print('Jaccard Similarity Accuracy: {}'.format(jaccard_acc))
-    print('Sorenson-Dice Similarity Accuracy: {}'.format(sd_acc))
+    print('Sorensen-Dice Similarity Accuracy: {}'.format(sd_acc))
     print('Forbes Similarity Accuracy: {}'.format(forbes_acc))
 
     outfile = input('Output Sketch Filename (enter for none): ')
