@@ -19,18 +19,25 @@ import math
 PlotSimilarityAccuracy.intersection():
 Calculate and plot the percent error of intersection between two HLLs of various cardinalities
 Based on an expected Jaccard value, using a simulated read generator based on a pre-set Jaccard
+Input: num_cards - number of cardinalities to generate
+base_start - Smallest cardinality in range
+base_stop - Largest cardinality in range
+num_trials - number of trials (intersection calculations) done for each set's cardinality
 """
-def intersection():
-    num_cards = 50
-    cardinalities = np.logspace(2, 6.7, num_cards) # Creates a range of cardinalities for set generation
+
+# num_cards, range of cardinalities, number of trials
+def intersection(num_cards, base_start, base_stop, num_trials):
+    # num_cards = 50
+    # 2, 6.7
+    cardinalities = np.logspace(base_start, base_stop, num_cards) # Creates a range of cardinalities for set generation
     plot = np.zeros(num_cards)
     for i in range(num_cards):
         print('Starting ' + str(i + 1) + ' out of ' + str(num_cards))
         card = int(cardinalities[i])
         # do 10 trials for each cardinality
-        trials = 10
-        results = np.zeros(trials)
-        for j in range(trials):
+        # trials = 10
+        results = np.zeros(num_trials)
+        for j in range(num_trials):
             h1 = HLL(12)
             h2 = HLL(12)
             # Random read (length 40) generator based on the cardinalities and the expected Jaccard value
@@ -57,18 +64,22 @@ def intersection():
 PlotSimilarityAccuracy.jaccard():
 Calculate and plot the percent error of Jaccard coefficient between two HLLs of various cardinalities
 Based on an expected Jaccard value, using a simulated read generator based on a pre-set Jaccard
+Input: num_cards - number of cardinalities to generate
+base_start - Smallest cardinality in range
+base_stop - Largest cardinality in range
+num_trials - number of trials (Jaccard calculations) done for each set's cardinality
 """
-def jaccard():
-    num_cards = 50
-    cardinalities = np.logspace(2, 6.7, num_cards)  # Generates a range of cardinalities for set generation
+def jaccard(num_cards, base_start, base_stop, num_trials):
+    # num_cards = 50
+    cardinalities = np.logspace(base_start, base_stop, num_cards)  # Generates a range of cardinalities for set generation
     plot = np.zeros(num_cards)
     for i in range(num_cards):
         print('Starting '+str(i+1)+' out of '+str(num_cards))
         card = int(cardinalities[i])
         # do 10 trials for each cardinality
-        trials = 10
-        results = np.zeros(trials)
-        for j in range(trials):
+        # trials = 10
+        results = np.zeros(num_trials)
+        for j in range(num_trials):
             h1 = HLL(12)
             h2 = HLL(12)
             # Generate reads of length 40 based on the expected Jaccard, 0.02
@@ -90,25 +101,29 @@ def jaccard():
     plt.xlabel('Cardinality')
     plt.ylabel('% Error (mean of 10)')
     plt.ylim(-100, 100)
-    plt.scatter(cardinalities,plot)
+    plt.scatter(cardinalities, plot)
     plt.show()
 
 """
 PlotSimilarityAccuracy.forbes():
 Calculate and plot the percent error of Forbes coefficient between two HLLs of various cardinalities
 Based on an expected Forbes value, using a simulated read generator based on a pre-set Forbes
+Input: num_cards - number of cardinalities to generate
+base_start - Smallest cardinality in range
+base_stop - Largest cardinality in range
+num_trials - number of trials (Forbes calculations) done for each set's cardinality
 """
-def forbes():
-    num_cards = 50
-    cardinalities = np.logspace(2, 6.7, num_cards) # Generates a range of cardinalities for set generation
+def forbes(num_cards, base_start, base_stop, num_trials):
+    # num_cards = 50
+    cardinalities = np.logspace(base_start, base_stop, num_cards) # Generates a range of cardinalities for set generation
     plot = np.zeros(num_cards)
     for i in range(num_cards):
         print('Starting '+str(i+1)+' out of '+str(num_cards))
         card = int(cardinalities[i])
         # do 10 trials for each cardinality
-        trials = 10
-        results = np.zeros(trials)
-        for j in range(trials):
+        # trials = 10
+        results = np.zeros(num_trials)
+        for j in range(num_trials):
             h1 = HLL(12)
             h2 = HLL(12)
             # Generate reads of length 40 based on the expected Forbes, 0.1
@@ -121,7 +136,7 @@ def forbes():
             intersection = Similarity.intersection(h1,h2)
             b_size, c_size, a_size = Similarity.getJointEstimators(h1, h2)
             obs_forbes = (intersection * union) / ((intersection * union) + 3 / 2 * (b_size * c_size))
-            error = 100*(obs_forbes - exp_forbes)/(exp_forbes)
+            error = 100 * (obs_forbes - exp_forbes) / exp_forbes
             results[j] = error
         plot[i] = np.mean(results)
 
@@ -131,25 +146,29 @@ def forbes():
     plt.xlabel('Cardinality')
     plt.ylabel('% Error (mean of 10)')
     plt.ylim(-100, 100)
-    plt.scatter(cardinalities,plot)
+    plt.scatter(cardinalities, plot)
     plt.show()
 
 """
 PlotSimilarityAccuracy.sd():
 Calculate and plot the percent error of Sorensen-Dice coefficient between two HLLs of various cardinalities
 Based on an expected Sorensen-Dice value, using a simulated read generator based on a pre-set Sorensen-Dice
+Input: num_cards - number of cardinalities to generate
+base_start - Smallest cardinality in range
+base_stop - Largest cardinality in range
+num_trials - number of trials (Sorensen-Dice calculations) done for each set's cardinality
 """
-def sd():
-    num_cards = 50
-    cardinalities = np.logspace(2, 6.7, num_cards) # Generates a range of cardinalities for set generation
+def sd(num_cards, base_start, base_stop, num_trials):
+    # num_cards = 50
+    cardinalities = np.logspace(base_start, base_stop, num_cards) # Generates a range of cardinalities for set generation
     plot = np.zeros(num_cards)
     for i in range(num_cards):
         print('Starting '+str(i+1)+' out of '+str(num_cards))
         card = int(cardinalities[i])
         # do 10 trials for each cardinality
-        trials = 10
-        results = np.zeros(trials)
-        for j in range(trials):
+        # trials = 10
+        results = np.zeros(num_trials)
+        for j in range(num_trials):
             h1 = HLL(12)
             h2 = HLL(12)
             # Generate reads of length 40 based on the expected Forbes, 0.04
@@ -164,31 +183,36 @@ def sd():
             error = 100 * (obs_sd - exp_sd) / exp_sd # Percent error calculation for SD
             results[j] = error
         plot[i] = np.mean(results)
-    print(plot) # Print out all percent errors
+    print(plot)  # Print out all percent errors
     plt.xscale('log')
     plt.title('Sorenson-Dice (set at 0.04) Accuracy for reads of length 40')
     plt.xlabel('Cardinality')
     plt.ylabel('% Error (mean of 10)')
-    plt.scatter(cardinalities,plot)
+    plt.scatter(cardinalities, plot)
     plt.show()
 
 """
 main()
 Calls the appropriate function based on the command line argument received
-Input: The command-line argument
+Input: The command-line arguments
 """
-def main(arg):
+def main(arg, num_c, card_s, card_sp, num_t):
     # Function callers based on command line argument
     if arg == "jaccard":
-        jaccard()
+        jaccard(num_c, card_s, card_sp, num_t)
     elif arg == "forbes":
-        forbes()
+        forbes(num_c, card_s, card_sp, num_t)
     elif arg == "sd":
-        sd()
+        sd(num_c, card_s, card_sp, num_t)
     elif arg == "intersection":
-        intersection()
+        intersection(num_c, card_s, card_sp, num_t)
 
 
 if (__name__ == '__main__'):
+    # Hyperparameters we used for this project: num_c = 50, card_s = 2, card_sp = 6.7, 
     arg = sys.argv[1]
-    main(arg)
+    num_c = int(sys.argv[2])
+    card_s = float(sys.argv[3])
+    card_sp = float(sys.argv[4])
+    num_t = int(sys.argv[5])
+    main(arg, num_c, card_s, card_sp, num_t)
